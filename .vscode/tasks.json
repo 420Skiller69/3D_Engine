@@ -4,18 +4,18 @@
         {
             "type": "shell",
             "label": "gcc.exe build active file",
-            "command": "C:\\MinGW\\bin\\gcc.exe",
+            "command": "C:\\MinGW\\mingw64\\bin\\gcc.exe",
             "args": [
                 "-g",
                 "${file}",
                 "-IC:\\Users\\MetzGer\\Documents\\SDL2\\include",
-                "-LC:\\Users\\MetzGer\\Documents\\SDL2\\lib\\x86",
+                "-LC:\\Users\\MetzGer\\Documents\\SDL2\\lib\\x64",
                 "-lSDL2main", "-lSDL2",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "C:\\MinGW\\bin"
+                "cwd": "C:\\MinGW\\mingw64\\bin"
             },
             "problemMatcher": [
                 "$gcc"

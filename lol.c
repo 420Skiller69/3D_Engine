@@ -15,7 +15,7 @@ int WIN_H = 500;
 #define mouSens 5
 #define speed 3				/100.0
 #define POV 1
-#define RES 20
+#define RES 1
 
 SDL_Event event;
 
@@ -69,12 +69,12 @@ int main(int argc, char* args[])
 	fclose(file);
 
 	//----------------------------------------------------------------------------------------------------------------GAme LoOp
-	int wK = 0, aK = 0, sK = 0, dK = 0, spaceK = 0, LshiftK = 0;
+	int wK = 0, aK = 0, sK = 0, dK = 0, spaceK = 0, LshiftK = 0, focus = 1;
 	double t1 = 0, t2 = 0;
 	int clsd = 0;
 	int framecount = 0;
 	double timecount = 0;
-	SDL_WarpMouseInWindow(win, WIN_W / 2, WIN_H / 2);
+	SDL_WarpMouseGlobal(WIN_W / 2, WIN_H / 2);
 	while (!clsd)
 	{
 		if (t2 - t1 > 1000.0 / FPS)
@@ -165,6 +165,23 @@ int main(int argc, char* args[])
 					}
 					break;
 
+				case(SDL_WINDOWEVENT):
+					switch(event.window.event)
+					{
+					case(SDL_WINDOWEVENT_FOCUS_GAINED):
+						SDL_WarpMouseGlobal( WIN_W / 2, WIN_H / 2);
+						SDL_ShowCursor(SDL_DISABLE);
+						focus = 1;
+						break;
+
+					case(SDL_WINDOWEVENT_FOCUS_LOST):
+						focus = 0;
+						SDL_ShowCursor(SDL_ENABLE);
+						break;
+
+					default:
+						break;
+					}
 				default:
 					break;
 				}
@@ -175,31 +192,33 @@ int main(int argc, char* args[])
 
 
 			//---------------------------------------------------calculate view Vector
-			int mx, my;
-			SDL_GetMouseState(&mx, &my);
-
-			int dmx, dmy;
-			if (mx != WIN_W / 2 || my != WIN_H / 2)
+			if(focus)
 			{
-				dmx = -(mx - WIN_W / 2);
-				dmy = -(my - WIN_H / 2);
-				SDL_WarpMouseInWindow(win, WIN_W / 2, WIN_H / 2);
+				int mx, my;
+				SDL_GetMouseState(&mx, &my);
+
+				int dmx, dmy;
+				if (mx != WIN_W / 2 || my != WIN_H / 2)
+				{
+					dmx = -(mx - WIN_W / 2);
+					dmy = -(my - WIN_H / 2);
+					SDL_WarpMouseInWindow(win, WIN_W / 2, WIN_H / 2);
+				}
+				else
+				{
+					dmx = 0;
+					dmy = 0;
+				}
+
+				B -= dmx * (double)mouSens / 10000.0;
+				alp -= dmy * (double)mouSens / 10000.0;
+
+				if (B >= 2 * M_PI) B -= 2 * M_PI;
+				if (B <= 0) B += 2 * M_PI;
+
+				if (alp > M_PI - 0.01) alp = M_PI - 0.01;
+				if (alp < 0.01) alp = 0.01;
 			}
-			else
-			{
-				dmx = 0;
-				dmy = 0;
-			}
-
-			B -= dmx * (double)mouSens / 10000.0;
-			alp -= dmy * (double)mouSens / 10000.0;
-
-			if (B >= 2 * M_PI) B -= 2 * M_PI;
-			if (B <= 0) B += 2 * M_PI;
-
-			if (alp > M_PI - 0.01) alp = M_PI - 0.01;
-			if (alp < 0.01) alp = 0.01;
-
 			view[0] = cos(B) * sin(alp);
 			view[1] = sin(B) * sin(alp);
 			view[2] = cos(alp);
@@ -254,8 +273,6 @@ int main(int argc, char* args[])
 			abso = sqrt(pow(p2[0],2)+pow(p2[1],2)+pow(p2[2],2));
 			for(int i = 0; i < 3; i++) p2[i] = p2[i]/abso;		
 			
-			if ((framecount % 100) == 0)	printf("%.1f | %.1f \n",alp,B);
-
 			for (int i = 0; i < polysLen; i++)
 			{
 				int outc = 0;
